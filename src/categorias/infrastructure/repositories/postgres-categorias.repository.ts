@@ -75,6 +75,18 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
       sets.push(`descripcion = $${i++}`);
       values.push(data.descripcion);
     }
+    if (typeof (data as any).slug === 'string') {
+      sets.push(`slug = $${i++}`);
+      values.push((data as any).slug);
+    }
+    if (typeof (data as any).color === 'string') {
+      sets.push(`color = $${i++}`);
+      values.push((data as any).color);
+    }
+    if (typeof (data as any).icono === 'string') {
+      sets.push(`icono = $${i++}`);
+      values.push((data as any).icono);
+    }
 
     // Nada que actualizar
     if (sets.length === 0) {

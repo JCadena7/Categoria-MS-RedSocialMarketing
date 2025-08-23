@@ -30,9 +30,11 @@ export class CategoriasController {
   }
 
   @MessagePattern('findOneCategoria')
-  findOne(@Payload('id', ParseIntPipe) id: number) {
-    console.log('findOneCategoria', id);
-    return this.findOneCategoria.execute(id);
+  findOne(@Payload() payload: any) {
+    const id = typeof payload === 'number' ? payload : Number(payload?.id);
+    const withPosts = !!(typeof payload === 'object' && payload?.withPosts);
+    console.log('findOneCategoria', { id, withPosts });
+    return this.findOneCategoria.execute(id, withPosts);
   }
 
   @MessagePattern('updateCategoria')
