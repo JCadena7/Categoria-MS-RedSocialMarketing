@@ -104,3 +104,4 @@ export const db = Object.freeze({
 });
 
 export default db;
+export type DB = typeof db;

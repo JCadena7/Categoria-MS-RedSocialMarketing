@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CategoriasController } from './categorias.controller';
-import { InMemoryCategoriasRepository } from './infrastructure/repositories/in-memory-categorias.repository';
+import { PostgresCategoriasRepository } from './infrastructure/repositories/postgres-categorias.repository';
 import { CATEGORIAS_REPOSITORY } from './tokens';
 import { CreateCategoriaUseCase } from './application/use-cases/create-categoria.usecase';
 import { FindAllCategoriasUseCase } from './application/use-cases/find-all-categorias.usecase';
@@ -11,7 +11,7 @@ import { RemoveCategoriaUseCase } from './application/use-cases/remove-categoria
 @Module({
   controllers: [CategoriasController],
   providers: [
-    { provide: CATEGORIAS_REPOSITORY, useClass: InMemoryCategoriasRepository },
+    { provide: CATEGORIAS_REPOSITORY, useClass: PostgresCategoriasRepository },
     CreateCategoriaUseCase,
     FindAllCategoriasUseCase,
     FindOneCategoriaUseCase,
