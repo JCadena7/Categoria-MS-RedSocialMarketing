@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
@@ -20,6 +20,7 @@ export class CategoriasController {
 
   @MessagePattern('createCategoria')
   create(@Payload() createCategoriaDto: CreateCategoriaDto) {
+    // console.log('createCategoria', createCategoriaDto);
     return this.createCategoria.execute(createCategoriaDto);
   }
 
@@ -29,17 +30,19 @@ export class CategoriasController {
   }
 
   @MessagePattern('findOneCategoria')
-  findOne(@Payload() id: number) {
+  findOne(@Payload('id', ParseIntPipe) id: number) {
+    console.log('findOneCategoria', id);
     return this.findOneCategoria.execute(id);
   }
 
   @MessagePattern('updateCategoria')
   update(@Payload() updateCategoriaDto: UpdateCategoriaDto) {
+    console.log('updateCategoria', updateCategoriaDto);
     return this.updateCategoria.execute(updateCategoriaDto);
   }
 
   @MessagePattern('removeCategoria')
-  remove(@Payload() id: number) {
+  remove(@Payload('id', ParseIntPipe) id: number) {
     return this.removeCategoria.execute(id);
   }
 }
