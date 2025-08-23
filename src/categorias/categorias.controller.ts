@@ -1,35 +1,45 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { CategoriasService } from './categorias.service';
 import { CreateCategoriaDto } from './dto/create-categoria.dto';
 import { UpdateCategoriaDto } from './dto/update-categoria.dto';
+import { CreateCategoriaUseCase } from './application/use-cases/create-categoria.usecase';
+import { FindAllCategoriasUseCase } from './application/use-cases/find-all-categorias.usecase';
+import { FindOneCategoriaUseCase } from './application/use-cases/find-one-categoria.usecase';
+import { UpdateCategoriaUseCase } from './application/use-cases/update-categoria.usecase';
+import { RemoveCategoriaUseCase } from './application/use-cases/remove-categoria.usecase';
 
 @Controller()
 export class CategoriasController {
-  constructor(private readonly categoriasService: CategoriasService) {}
+  constructor(
+    private readonly createCategoria: CreateCategoriaUseCase,
+    private readonly findAllCategorias: FindAllCategoriasUseCase,
+    private readonly findOneCategoria: FindOneCategoriaUseCase,
+    private readonly updateCategoria: UpdateCategoriaUseCase,
+    private readonly removeCategoria: RemoveCategoriaUseCase,
+  ) {}
 
   @MessagePattern('createCategoria')
   create(@Payload() createCategoriaDto: CreateCategoriaDto) {
-    return this.categoriasService.create(createCategoriaDto);
+    return this.createCategoria.execute(createCategoriaDto);
   }
 
   @MessagePattern('findAllCategorias')
   findAll() {
-    return this.categoriasService.findAll();
+    return this.findAllCategorias.execute();
   }
 
   @MessagePattern('findOneCategoria')
   findOne(@Payload() id: number) {
-    return this.categoriasService.findOne(id);
+    return this.findOneCategoria.execute(id);
   }
 
   @MessagePattern('updateCategoria')
   update(@Payload() updateCategoriaDto: UpdateCategoriaDto) {
-    return this.categoriasService.update(updateCategoriaDto.id, updateCategoriaDto);
+    return this.updateCategoria.execute(updateCategoriaDto);
   }
 
   @MessagePattern('removeCategoria')
   remove(@Payload() id: number) {
-    return this.categoriasService.remove(id);
+    return this.removeCategoria.execute(id);
   }
 }
