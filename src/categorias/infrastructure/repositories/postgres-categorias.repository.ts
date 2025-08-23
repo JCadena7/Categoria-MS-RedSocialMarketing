@@ -8,6 +8,9 @@ interface CategoriaRow {
   id: number;
   nombre: string;
   descripcion: string;
+  slug?: string;
+  color?: string;
+  icono?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -17,6 +20,9 @@ function mapRow(r: CategoriaRow): Categoria {
     id: r.id,
     nombre: r.nombre,
     descripcion: r.descripcion,
+    slug: r.slug,
+    color: r.color,
+    icono: r.icono,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };
@@ -27,17 +33,19 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
   constructor(@Inject(PG_DB) private readonly db: DB) {}
 
   async create(data: CreateCategoriaData): Promise<Categoria> {
+    const slug = data.nombre.toLowerCase().replace(/\s+/g, '-');
+    console.log("data", data);
     const [row] = await this.db.query<CategoriaRow>(this.db.sql`
-      insert into categorias (nombre, descripcion)
-      values (${data.nombre}, ${data.descripcion})
-      returning id, nombre, descripcion, created_at, updated_at
+      insert into categorias (nombre, descripcion, slug, color, icono)
+      values (${data.nombre}, ${data.descripcion}, ${data.slug}, ${data.color}, ${data.icono})
+      returning id, nombre, descripcion, slug, color, icono, created_at, updated_at
     `);
     return mapRow(row);
   }
 
   async findAll(): Promise<Categoria[]> {
     const rows = await this.db.query<CategoriaRow>(this.db.sql`
-      select id, nombre, descripcion, created_at, updated_at
+      select id, nombre, descripcion, slug, color, icono, created_at, updated_at
       from categorias
       order by id asc
     `);
@@ -46,7 +54,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
 
   async findOne(id: number): Promise<Categoria | null> {
     const rows = await this.db.query<CategoriaRow>(this.db.sql`
-      select id, nombre, descripcion, created_at, updated_at
+      select id, nombre, descripcion, slug, color, icono, created_at, updated_at
       from categorias
       where id = ${id}
       limit 1
@@ -75,7 +83,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
     }
 
     sets.push('updated_at = now()');
-    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, created_at, updated_at`;
+    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, slug, color, icono, created_at, updated_at`;
     values.push(id);
 
     const rows = await this.db.query<CategoriaRow>(text, values);

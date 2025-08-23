@@ -69,6 +69,9 @@ export async function initDatabase() {
         id SERIAL PRIMARY KEY,
         nombre VARCHAR(100) UNIQUE NOT NULL,
         descripcion TEXT,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        color VARCHAR(10),
+        icono VARCHAR(10),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );

@@ -6,6 +6,11 @@ export class Categoria {
    nombre!: string;
    descripcion!: string;
 
+   // opcional
+   slug?: string;
+   color?: string;
+   icono?: string;
+
    // Opcionales: timestamps manejados por la BD
    created_at?: Date;
    updated_at?: Date;

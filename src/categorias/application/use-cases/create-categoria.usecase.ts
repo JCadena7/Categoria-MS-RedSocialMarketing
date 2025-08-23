@@ -15,6 +15,9 @@ export class CreateCategoriaUseCase {
     const data = {
       nombre: dto.nombre.trim(),
       descripcion: dto.descripcion.trim(),
+      slug: dto.slug?.trim() || dto.nombre.trim().toLowerCase().replace(/\s+/g, '-'),
+      color: dto.color?.trim(),
+      icono: dto.icono?.trim(),
     };
     return this.repo.create(data);
   }

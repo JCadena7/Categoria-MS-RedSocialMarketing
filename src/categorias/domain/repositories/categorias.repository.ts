@@ -1,6 +1,6 @@
 import { Categoria } from '../../entities/categoria.entity';
 
-export type CreateCategoriaData = Omit<Categoria, 'id' | 'created_at' | 'updated_at'>;
+export type CreateCategoriaData = Omit<Categoria, 'id' | 'created_at' | 'updated_at '>;
 export type UpdateCategoriaData = Partial<CreateCategoriaData>;
 
 export interface ICategoriasRepository {

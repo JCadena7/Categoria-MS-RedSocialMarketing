@@ -20,6 +20,21 @@ export class CreateCategoriaDto {
     @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
     descripcion!: string;
 
+    // Opcionales adicionales solicitados
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+    slug?: string;
+
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+    color?: string;
+
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+    icono?: string;
 
     // Opcionales: normalmente los maneja la BD
     @IsOptional()
@@ -30,5 +45,3 @@ export class CreateCategoriaDto {
     @IsDateString()
     updated_at?: string;
 }
-
-
