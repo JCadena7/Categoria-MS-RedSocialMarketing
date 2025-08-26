@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Categoria } from '../../entities/categoria.entity';
-import { ICategoriasRepository, CreateCategoriaData, UpdateCategoriaData } from '../../domain/repositories/categorias.repository';
+import { ICategoriasRepository, CreateCategoriaData, UpdateCategoriaData, FindAllCategoriasOptions, Paginated } from '../../domain/repositories/categorias.repository';
 import type { DB } from '../../../database/pg';
 import { PG_DB } from '../../../database/tokens';
 
@@ -8,6 +8,9 @@ interface CategoriaRow {
   id: number;
   nombre: string;
   descripcion: string;
+  slug?: string;
+  color?: string;
+  icono?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -17,6 +20,9 @@ function mapRow(r: CategoriaRow): Categoria {
     id: r.id,
     nombre: r.nombre,
     descripcion: r.descripcion,
+    slug: r.slug,
+    color: r.color,
+    icono: r.icono,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };
@@ -28,25 +34,61 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
 
   async create(data: CreateCategoriaData): Promise<Categoria> {
     const [row] = await this.db.query<CategoriaRow>(this.db.sql`
-      insert into categorias (nombre, descripcion)
-      values (${data.nombre}, ${data.descripcion})
-      returning id, nombre, descripcion, created_at, updated_at
+      insert into categorias (nombre, descripcion, slug, color, icono)
+      values (${data.nombre}, ${data.descripcion}, ${data.slug}, ${data.color}, ${data.icono})
+      returning id, nombre, descripcion, slug, color, icono, created_at, updated_at
     `);
     return mapRow(row);
   }
 
-  async findAll(): Promise<Categoria[]> {
-    const rows = await this.db.query<CategoriaRow>(this.db.sql`
-      select id, nombre, descripcion, created_at, updated_at
-      from categorias
-      order by id asc
-    `);
-    return rows.map(mapRow);
+  async findAll(options?: FindAllCategoriasOptions): Promise<Paginated<Categoria>> {
+    const page = Math.max(1, Number(options?.page) || 1);
+    const limit = Math.max(1, Math.min(100, Number(options?.limit) || 10));
+    const search = options?.search?.trim();
+    const slug = options?.slug?.trim();
+    const color = options?.color?.trim();
+    const allowedOrderBy = new Set(['id', 'nombre', 'created_at', 'updated_at']);
+    const orderBy = allowedOrderBy.has(String(options?.orderBy)) ? String(options?.orderBy) : 'id';
+    const order = String(options?.order)?.toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+    const conditions: string[] = [];
+    const values: any[] = [];
+    let i = 1;
+    if (search) {
+      conditions.push(`(nombre ILIKE $${i} OR COALESCE(descripcion,'') ILIKE $${i + 1})`);
+      values.push(`%${search}%`, `%${search}%`);
+      i += 2;
+    }
+    if (slug) {
+      conditions.push(`slug = $${i++}`);
+      values.push(slug);
+    }
+    if (color) {
+      conditions.push(`color = $${i++}`);
+      values.push(color);
+    }
+    const where = conditions.length ? `where ${conditions.join(' and ')}` : '';
+
+    // total count
+    const countText = `select count(*)::int as total from categorias ${where}`;
+    const countRows = await this.db.query<{ total: number }>(countText, values);
+    const total = countRows[0]?.total ?? 0;
+
+    // page items
+    const selText = `select id, nombre, descripcion, slug, color, icono, created_at, updated_at
+      from categorias ${where}
+      order by ${orderBy} ${order}
+      limit $${i} offset $${i + 1}`;
+    const pageValues = [...values, limit, (page - 1) * limit];
+    const rows = await this.db.query<CategoriaRow>(selText, pageValues);
+    const items = rows.map(mapRow);
+    const pages = Math.max(1, Math.ceil(total / limit));
+    return { items, total, page, limit, pages };
   }
 
   async findOne(id: number): Promise<Categoria | null> {
     const rows = await this.db.query<CategoriaRow>(this.db.sql`
-      select id, nombre, descripcion, created_at, updated_at
+      select id, nombre, descripcion, slug, color, icono, created_at, updated_at
       from categorias
       where id = ${id}
       limit 1
@@ -67,6 +109,18 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
       sets.push(`descripcion = $${i++}`);
       values.push(data.descripcion);
     }
+    if (typeof (data as any).slug === 'string') {
+      sets.push(`slug = $${i++}`);
+      values.push((data as any).slug);
+    }
+    if (typeof (data as any).color === 'string') {
+      sets.push(`color = $${i++}`);
+      values.push((data as any).color);
+    }
+    if (typeof (data as any).icono === 'string') {
+      sets.push(`icono = $${i++}`);
+      values.push((data as any).icono);
+    }
 
     // Nada que actualizar
     if (sets.length === 0) {
@@ -75,7 +129,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
     }
 
     sets.push('updated_at = now()');
-    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, created_at, updated_at`;
+    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, slug, color, icono, created_at, updated_at`;
     values.push(id);
 
     const rows = await this.db.query<CategoriaRow>(text, values);
