@@ -26,6 +26,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  
 
   await app.listen();
   logger.log(`🚀 categorias microdervice running on port ${envs.port}`);
