@@ -18,6 +18,10 @@ export class CreateCategoriaUseCase {
       slug: dto.slug?.trim() || dto.nombre.trim().toLowerCase().replace(/\s+/g, '-'),
       color: dto.color?.trim(),
       icono: dto.icono?.trim(),
+      parent_id: dto.parent_id ?? null,
+      is_active: dto.is_active ?? true,
+      display_order: dto.display_order ?? 0,
+      created_by: dto.created_by ?? null,
     };
     return this.repo.create(data);
   }

@@ -8,6 +8,10 @@ import { FindAllCategoriasUseCase } from './application/use-cases/find-all-categ
 import { FindOneCategoriaUseCase } from './application/use-cases/find-one-categoria.usecase';
 import { UpdateCategoriaUseCase } from './application/use-cases/update-categoria.usecase';
 import { RemoveCategoriaUseCase } from './application/use-cases/remove-categoria.usecase';
+import { GetCategoriasStatsUseCase } from './application/use-cases/get-categorias-stats.usecase';
+import { GetEngagementPorCategoriaUseCase } from './application/use-cases/get-engagement-por-categoria.usecase';
+import { GetCategoriasMejorRendimientoUseCase } from './application/use-cases/get-categorias-mejor-rendimiento.usecase';
+import { GetCategoriasJerarquicasUseCase } from './application/use-cases/get-categorias-jerarquicas.usecase';
 
 @Controller()
 export class CategoriasController {
@@ -17,6 +21,10 @@ export class CategoriasController {
     private readonly findOneCategoria: FindOneCategoriaUseCase,
     private readonly updateCategoria: UpdateCategoriaUseCase,
     private readonly removeCategoria: RemoveCategoriaUseCase,
+    private readonly getCategoriasStats: GetCategoriasStatsUseCase,
+    private readonly getEngagementPorCategoria: GetEngagementPorCategoriaUseCase,
+    private readonly getCategoriasMejorRendimiento: GetCategoriasMejorRendimientoUseCase,
+    private readonly getCategoriasJerarquicas: GetCategoriasJerarquicasUseCase,
   ) {}
 
   @MessagePattern('createCategoria')
@@ -62,5 +70,25 @@ export class CategoriasController {
   @MessagePattern('removeCategoria')
   remove(@Payload('id', ParseIntPipe) id: number) {
     return this.removeCategoria.execute(id);
+  }
+
+  @MessagePattern('getCategoriasStats')
+  getStats() {
+    return this.getCategoriasStats.execute();
+  }
+
+  @MessagePattern('getEngagementPorCategoria')
+  getEngagement() {
+    return this.getEngagementPorCategoria.execute();
+  }
+
+  @MessagePattern('getCategoriasMejorRendimiento')
+  getMejorRendimiento() {
+    return this.getCategoriasMejorRendimiento.execute();
+  }
+
+  @MessagePattern('getCategoriasJerarquicas')
+  getJerarquicas() {
+    return this.getCategoriasJerarquicas.execute();
   }
 }

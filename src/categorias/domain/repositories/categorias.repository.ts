@@ -3,7 +3,7 @@ import { Categoria } from '../../entities/categoria.entity';
 export type CreateCategoriaData = Omit<Categoria, 'id' | 'created_at' | 'updated_at'>;
 export type UpdateCategoriaData = Partial<CreateCategoriaData>;
 
-export type OrderByCategoria = 'id' | 'nombre' | 'created_at' | 'updated_at';
+export type OrderByCategoria = 'id' | 'nombre' | 'created_at' | 'updated_at' | 'display_order' | 'posts_count';
 export type OrderDirection = 'asc' | 'desc';
 
 export interface FindAllCategoriasOptions {
@@ -12,6 +12,8 @@ export interface FindAllCategoriasOptions {
   search?: string;
   slug?: string;
   color?: string;
+  parent_id?: number | null;
+  is_active?: boolean;
   orderBy?: OrderByCategoria;
   order?: OrderDirection;
 }

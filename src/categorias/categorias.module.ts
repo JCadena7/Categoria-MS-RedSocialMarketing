@@ -7,6 +7,10 @@ import { FindAllCategoriasUseCase } from './application/use-cases/find-all-categ
 import { FindOneCategoriaUseCase } from './application/use-cases/find-one-categoria.usecase';
 import { UpdateCategoriaUseCase } from './application/use-cases/update-categoria.usecase';
 import { RemoveCategoriaUseCase } from './application/use-cases/remove-categoria.usecase';
+import { GetCategoriasStatsUseCase } from './application/use-cases/get-categorias-stats.usecase';
+import { GetEngagementPorCategoriaUseCase } from './application/use-cases/get-engagement-por-categoria.usecase';
+import { GetCategoriasMejorRendimientoUseCase } from './application/use-cases/get-categorias-mejor-rendimiento.usecase';
+import { GetCategoriasJerarquicasUseCase } from './application/use-cases/get-categorias-jerarquicas.usecase';
 
 @Module({
   controllers: [CategoriasController],
@@ -17,6 +21,10 @@ import { RemoveCategoriaUseCase } from './application/use-cases/remove-categoria
     FindOneCategoriaUseCase,
     UpdateCategoriaUseCase,
     RemoveCategoriaUseCase,
+    GetCategoriasStatsUseCase,
+    GetEngagementPorCategoriaUseCase,
+    GetCategoriasMejorRendimientoUseCase,
+    GetCategoriasJerarquicasUseCase,
   ],
 })
 export class CategoriasModule {}
