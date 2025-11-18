@@ -1,6 +1,5 @@
-import { Type } from 'class-transformer';
+import { Type,  Transform} from 'class-transformer';
 import { IsNotEmpty, IsString, MaxLength, IsOptional, IsDateString, IsInt, IsBoolean } from 'class-validator';
-import { Transform } from 'class-transformer';
 
 export class CreateCategoriaDto {
     // Opcional: normalmente lo genera la BD
