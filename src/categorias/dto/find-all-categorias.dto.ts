@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Min, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 function toNumberOrDefault(value: any, def: number): number {
@@ -40,8 +40,22 @@ export class FindAllCategoriasDto {
   color?: string;
 
   @IsOptional()
-  @IsIn(['id', 'nombre', 'created_at', 'updated_at'])
-  orderBy?: 'id' | 'nombre' | 'created_at' | 'updated_at';
+  @IsInt()
+  @Transform(({ value }) => toNumberOrDefault(value, 0))
+  parent_id?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return undefined;
+  })
+  is_active?: boolean;
+
+  @IsOptional()
+  @IsIn(['id', 'nombre', 'created_at', 'updated_at', 'display_order', 'posts_count'])
+  orderBy?: 'id' | 'nombre' | 'created_at' | 'updated_at' | 'display_order' | 'posts_count';
 
   @IsOptional()
   @IsIn(['asc', 'desc'])

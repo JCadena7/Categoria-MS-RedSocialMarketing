@@ -13,7 +13,7 @@ async function bootstrap() {
     {
       transport: Transport.TCP,
       options: {
-        // host: 'envs.host',
+        host: '0.0.0.0',
         port: envs.port,
       },
     },
@@ -26,6 +26,7 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  
 
   await app.listen();
   logger.log(`🚀 categorias microdervice running on port ${envs.port}`);

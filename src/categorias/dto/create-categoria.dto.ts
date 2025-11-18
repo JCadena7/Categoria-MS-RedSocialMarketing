@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString, MaxLength, IsOptional, IsDateString, IsInt } from 'class-validator';
+import { IsNotEmpty, IsString, MaxLength, IsOptional, IsDateString, IsInt, IsBoolean } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateCategoriaDto {
@@ -35,6 +35,26 @@ export class CreateCategoriaDto {
     @IsString()
     @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
     icono?: string;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    parent_id?: number | null;
+
+    @IsOptional()
+    @Type(() => Boolean)
+    @IsBoolean()
+    is_active?: boolean;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    display_order?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    created_by?: number | null;
 
     // Opcionales: normalmente los maneja la BD
     @IsOptional()

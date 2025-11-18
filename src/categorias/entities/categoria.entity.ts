@@ -5,11 +5,16 @@ export class Categoria {
    // Requeridos
    nombre!: string;
    descripcion!: string;
+   slug!: string;
 
-   // opcional
-   slug?: string;
+   // Opcionales
    color?: string;
    icono?: string;
+   parent_id?: number | null;
+   posts_count?: number;
+   is_active?: boolean;
+   display_order?: number;
+   created_by?: number | null;
 
    // Opcionales: timestamps manejados por la BD
    created_at?: Date;

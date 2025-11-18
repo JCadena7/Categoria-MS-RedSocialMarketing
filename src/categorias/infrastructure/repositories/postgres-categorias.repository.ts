@@ -8,9 +8,14 @@ interface CategoriaRow {
   id: number;
   nombre: string;
   descripcion: string;
-  slug?: string;
+  slug: string;
   color?: string;
   icono?: string;
+  parent_id?: number | null;
+  posts_count?: number;
+  is_active?: boolean;
+  display_order?: number;
+  created_by?: number | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -23,6 +28,11 @@ function mapRow(r: CategoriaRow): Categoria {
     slug: r.slug,
     color: r.color,
     icono: r.icono,
+    parent_id: r.parent_id,
+    posts_count: r.posts_count,
+    is_active: r.is_active,
+    display_order: r.display_order,
+    created_by: r.created_by,
     created_at: r.created_at,
     updated_at: r.updated_at,
   };
@@ -34,9 +44,9 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
 
   async create(data: CreateCategoriaData): Promise<Categoria> {
     const [row] = await this.db.query<CategoriaRow>(this.db.sql`
-      insert into categorias (nombre, descripcion, slug, color, icono)
-      values (${data.nombre}, ${data.descripcion}, ${data.slug}, ${data.color}, ${data.icono})
-      returning id, nombre, descripcion, slug, color, icono, created_at, updated_at
+      insert into categorias (nombre, descripcion, slug, color, icono, parent_id, is_active, display_order, created_by)
+      values (${data.nombre}, ${data.descripcion}, ${data.slug}, ${data.color}, ${data.icono}, ${(data as any).parent_id}, ${(data as any).is_active ?? true}, ${(data as any).display_order ?? 0}, ${(data as any).created_by})
+      returning id, nombre, descripcion, slug, color, icono, parent_id, posts_count, is_active, display_order, created_by, created_at, updated_at
     `);
     return mapRow(row);
   }
@@ -47,8 +57,8 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
     const search = options?.search?.trim();
     const slug = options?.slug?.trim();
     const color = options?.color?.trim();
-    const allowedOrderBy = new Set(['id', 'nombre', 'created_at', 'updated_at']);
-    const orderBy = allowedOrderBy.has(String(options?.orderBy)) ? String(options?.orderBy) : 'id';
+    const allowedOrderBy = new Set(['id', 'nombre', 'created_at', 'updated_at', 'display_order', 'posts_count']);
+    const orderBy = allowedOrderBy.has(String(options?.orderBy)) ? String(options?.orderBy) : 'display_order';
     const order = String(options?.order)?.toLowerCase() === 'desc' ? 'desc' : 'asc';
 
     const conditions: string[] = [];
@@ -67,6 +77,18 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
       conditions.push(`color = $${i++}`);
       values.push(color);
     }
+    if (typeof options?.parent_id !== 'undefined') {
+      if (options.parent_id === null || options.parent_id === 0) {
+        conditions.push(`parent_id IS NULL`);
+      } else {
+        conditions.push(`parent_id = $${i++}`);
+        values.push(options.parent_id);
+      }
+    }
+    if (typeof options?.is_active === 'boolean') {
+      conditions.push(`is_active = $${i++}`);
+      values.push(options.is_active);
+    }
     const where = conditions.length ? `where ${conditions.join(' and ')}` : '';
 
     // total count
@@ -75,7 +97,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
     const total = countRows[0]?.total ?? 0;
 
     // page items
-    const selText = `select id, nombre, descripcion, slug, color, icono, created_at, updated_at
+    const selText = `select id, nombre, descripcion, slug, color, icono, parent_id, posts_count, is_active, display_order, created_by, created_at, updated_at
       from categorias ${where}
       order by ${orderBy} ${order}
       limit $${i} offset $${i + 1}`;
@@ -88,7 +110,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
 
   async findOne(id: number): Promise<Categoria | null> {
     const rows = await this.db.query<CategoriaRow>(this.db.sql`
-      select id, nombre, descripcion, slug, color, icono, created_at, updated_at
+      select id, nombre, descripcion, slug, color, icono, parent_id, posts_count, is_active, display_order, created_by, created_at, updated_at
       from categorias
       where id = ${id}
       limit 1
@@ -121,6 +143,18 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
       sets.push(`icono = $${i++}`);
       values.push((data as any).icono);
     }
+    if (typeof (data as any).parent_id !== 'undefined') {
+      sets.push(`parent_id = $${i++}`);
+      values.push((data as any).parent_id);
+    }
+    if (typeof (data as any).is_active === 'boolean') {
+      sets.push(`is_active = $${i++}`);
+      values.push((data as any).is_active);
+    }
+    if (typeof (data as any).display_order === 'number') {
+      sets.push(`display_order = $${i++}`);
+      values.push((data as any).display_order);
+    }
 
     // Nada que actualizar
     if (sets.length === 0) {
@@ -129,7 +163,7 @@ export class PostgresCategoriasRepository implements ICategoriasRepository {
     }
 
     sets.push('updated_at = now()');
-    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, slug, color, icono, created_at, updated_at`;
+    const text = `update categorias set ${sets.join(', ')} where id = $${i} returning id, nombre, descripcion, slug, color, icono, parent_id, posts_count, is_active, display_order, created_by, created_at, updated_at`;
     values.push(id);
 
     const rows = await this.db.query<CategoriaRow>(text, values);
